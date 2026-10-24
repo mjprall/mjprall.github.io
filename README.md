@@ -1,6 +1,6 @@
 # mjprall.github.io
 
-Personal site for Matthew Prall. It is a static page, published with GitHub Pages at [https://mjprall.github.io/](https://mjprall.github.io/).
+Personal site for Matthew Prall. It is a static page, published with GitHub Pages at [https://matthewprall.com/](https://matthewprall.com/).
 
 There is no framework and no build step. Light and dark follow the visitor’s `prefers-color-scheme` setting.
 
@@ -12,6 +12,7 @@ There is no framework and no build step. Light and dark follow the visitor’s `
 | `style.css` | Layout, type, and the light/dark themes |
 | `assets/` | Screenshots, favicon, Open Graph image, and self-hosted fonts |
 | `.github/workflows/pages.yml` | Deploys the site on every push to `main` |
+| `CNAME` | Custom domain. The file contains `matthewprall.com`, and it is published at the site root. |
 | `LICENSE` | MIT license. Leave this file in place. |
 
 Fonts are [Newsreader](assets/fonts/NEWSREADER-OFL.txt) and [IBM Plex](assets/fonts/IBM-PLEX-OFL.txt), both under the SIL Open Font License.
@@ -33,7 +34,7 @@ Projects are ordinary HTML in `index.html`. There is no data file.
 
 To add a card, copy an existing `<article class="card">` and change the title, the one-line description, both links (the live site and the source repo), and the image. Put the image in `assets/` and write an `alt` that describes what is actually in the picture. Keep `width` and `height` in step with the file so the layout does not jump.
 
-Paths are relative (`assets/tee-ball.jpg`, `style.css`). They are meant to be served from the domain root, which is how both `https://mjprall.github.io/` and a later custom domain will host this user site. Do not prefix them with a repository name.
+Paths are relative (`assets/tee-ball.jpg`, `style.css`). They are served from the domain root of `https://matthewprall.com/`. Do not prefix them with a repository name.
 
 ## Publish
 
@@ -55,13 +56,13 @@ If the first run fails because Pages has no site yet, set the source as above an
 
 The action uploads the repository root and skips `.git` and `.github`. `index.html` is the site. `README.md` and `LICENSE` are published as files and are not linked from the page.
 
-## Point a Squarespace domain at this site
+## Custom domain
 
-Do this only when you are ready to serve the site on your own domain. **This repo does not contain a `CNAME` file on purpose.** Until that file exists, GitHub Pages keeps serving the site at `https://mjprall.github.io/` and does not redirect it.
+The primary host is **matthewprall.com** (the apex). `www.matthewprall.com` redirects to `https://matthewprall.com/` through GitHub Pages when DNS for both names is in place. The `CNAME` file stays the apex only. Do not put `www` in that file.
 
-Asset paths already work at the domain root, so the move does not require a path prefix or a rebuild.
+The Pages workflow uploads the repository root (`path: .` in `.github/workflows/pages.yml`). `CNAME` is not a hidden file, so it is part of the artifact and is published at the site root. Once the custom domain is active, `https://mjprall.github.io/` redirects to the apex. Removing the `CNAME` file, or clearing the custom domain in Pages settings, sends the site back to `mjprall.github.io`.
 
-Adding a custom domain makes `mjprall.github.io` redirect to that domain. If DNS is not ready yet, the site can look down during the change. Do the DNS and the `CNAME` file close together. Removing the `CNAME` file (or clearing the custom domain in Pages settings) sends the site back to `mjprall.github.io`.
+Canonical, Open Graph, Twitter image, and JSON-LD URLs in `index.html` use `https://matthewprall.com/`. Project links that were absolute `mjprall.github.io` URLs use the same host and keep their paths (`/factory-telemetry-sim/`, `/tee-ball-game/`, `/hoppy-Easter/`, `/is-it-plane/`). GitHub project sites for this account are also served under the user site’s custom domain.
 
 ### 1. DNS at Squarespace
 
@@ -92,28 +93,14 @@ Leave the domain’s nameservers at Squarespace. You are changing records, not m
 
 These addresses are the GitHub Pages values published in [Managing a custom domain for your GitHub Pages site](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/managing-a-custom-domain-for-your-github-pages-site). Check that page before you change DNS, in case GitHub has published new addresses.
 
-### 2. Tell GitHub the domain
+### 2. GitHub Pages
 
-Pick one hostname as canonical. GitHub redirects the other name to it when both have DNS records. Use the apex (`example.com`) if you want the bare domain, or `www.example.com` if you want `www`.
+The `CNAME` file already sets the custom domain to `matthewprall.com`. In **Settings → Pages**, confirm that custom domain and wait until the DNS check succeeds. Certificate provisioning can take a while, sometimes up to about a day.
 
-Either of these does the same thing:
-
-- Add a file named `CNAME` (no extension) in the repo root, containing only that hostname and a newline, and push it to `main`.
-- Or set **Settings → Pages → Custom domain** to that hostname and save. GitHub commits the same `CNAME` file.
-
-Wait until the Pages settings show that DNS is checked. Certificate provisioning can take a while, sometimes up to about a day.
+With DNS records for both the apex and `www`, GitHub redirects `www.matthewprall.com` to `https://matthewprall.com/`.
 
 ### 3. Enforce HTTPS
 
 When the certificate is ready, in **Settings → Pages**, turn on **Enforce HTTPS**. Leave it off until GitHub says the certificate is provisioned.
 
-### 4. Update the canonical URL in the page
-
-After the domain answers, edit `index.html` and point these at the new origin:
-
-- `<link rel="canonical">`
-- `og:url`
-- `og:image` and `twitter:image` (they are absolute, because Open Graph requires that)
-- the `url` field in the JSON-LD block
-
-Relative image and stylesheet paths can stay as they are.
+Relative image and stylesheet paths stay as they are. If the canonical host ever changes, update `CNAME` and the absolute URLs in `index.html` together: `rel="canonical"`, `og:url`, `og:image`, `twitter:image`, and the JSON-LD `url`.
