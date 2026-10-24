@@ -28,8 +28,9 @@ Then open `http://127.0.0.1:8000/`. Opening `index.html` as a file works too, be
 
 Projects are ordinary HTML in `index.html`. There is no data file.
 
-- The featured project is the `<article class="feature">` in the Projects section.
+- Featured projects are the `<article class="feature">` elements inside `<div class="project-row">`. On a wide screen they sit side by side.
 - Each game is an `<article class="card">` inside `<div class="cards">`, under the “Just for fun” heading.
+- The SLO calculator card links to `/slo-calculator/`. That path is the project site (repository [mjprall/slo-calculator](https://github.com/mjprall/slo-calculator)), not a folder in this repo. A root-relative path keeps working if this user site later moves to a custom domain.
 
 To add a card, copy an existing `<article class="card">` and change the title, the one-line description, both links (the live site and the source repo), and the image. Put the image in `assets/` and write an `alt` that describes what is actually in the picture. Keep `width` and `height` in step with the file so the layout does not jump.
 
