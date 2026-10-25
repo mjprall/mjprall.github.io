@@ -125,9 +125,10 @@
     </section>
 
     <!--
-      Projects are edited here. Copy an article.card to add a game, or edit the
-      featured article. Keep image paths relative (assets/...) so they work at
-      the domain root. See README.md.
+      Projects are edited here. Copy an article.feature inside .project-row, or
+      an article.card for a game. Keep image paths relative (assets/...).
+      The SLO calculator is a separate project site: link it as /slo-calculator/.
+      See README.md.
     -->
     <section class="projects" id="projects" aria-labelledby="projects-title">
       <div class="wrap">
@@ -136,6 +137,7 @@
           <h2 id="projects-title">Something you can click</h2>
         </div>
 
+        <div class="project-row">
         <article class="feature">
           <a class="shot feature-shot" href="https://mjprall.github.io/factory-telemetry-sim/" rel="noopener noreferrer" target="_blank">
             <span class="shot-frame">
@@ -162,6 +164,33 @@
             </p>
           </div>
         </article>
+
+        <article class="feature">
+          <a class="shot feature-shot" href="/slo-calculator/">
+            <span class="shot-frame">
+              <img
+                src="assets/slo-calculator.svg"
+                width="1200"
+                height="750"
+                alt="Error-budget burndown for a 99.9% SLO over 30 days. The line drops on a short outage, slopes through a slow rise in errors, then falls through zero during a flapping outage.">
+            </span>
+            <span class="visually-hidden">Open the SLO and error budget calculator</span>
+          </a>
+          <div class="feature-body">
+            <p class="eyebrow">Featured</p>
+            <h3>SLO &amp; error budget calculator</h3>
+            <ul class="tags" aria-label="Built with">
+              <li>Python</li>
+              <li>PyScript</li>
+            </ul>
+            <p>Pick an availability SLO and see the downtime and bad requests it allows. Then play a request stream with a sharp outage, a slow rise in errors, or a flapping fault, and compare multi-window burn-rate alerts with a single long-window threshold.</p>
+            <p class="actions">
+              <a class="button" href="/slo-calculator/">Open the calculator</a>
+              <a class="button ghost" href="https://github.com/mjprall/slo-calculator" rel="noopener noreferrer" target="_blank">Source<span class="visually-hidden"> for the SLO and error budget calculator on GitHub (opens in a new tab)</span></a>
+            </p>
+          </div>
+        </article>
+        </div>
       </div>
     </section>
 
