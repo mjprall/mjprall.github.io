@@ -35,89 +35,104 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 2rem 1rem;
+      padding: 1.5rem 1rem 2rem;
       line-height: 1.5;
     }
     h1 {
       font-family: var(--serif);
       font-weight: 560;
       letter-spacing: -0.03em;
-      margin: 0 0 0.5rem;
-      font-size: clamp(2rem, 5vw, 3rem);
+      margin: 0 0 0.4rem;
+      font-size: clamp(1.8rem, 5vw, 2.6rem);
     }
     .lede {
       color: var(--muted);
-      margin: 0 0 1.5rem;
+      margin: 0 0 1.25rem;
       text-align: center;
-      max-width: 36rem;
+      max-width: 32rem;
+      font-size: 0.95rem;
     }
-    .picker {
-      margin-bottom: 1.25rem;
+    .tabs {
       display: flex;
-      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 0.75rem;
+    }
+    .tabs button {
+      min-height: 36px;
+      padding: 0.3rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid var(--muted);
+      background: transparent;
+      color: var(--ink);
+      font: 500 0.85rem/1 var(--sans);
+      cursor: pointer;
+    }
+    .tabs button.active {
+      background: var(--enamel);
+      color: #f6f3ec;
+      border-color: var(--enamel);
+    }
+    .thumbs {
+      display: flex;
+      gap: 0.6rem;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+    .thumbs img {
+      width: 72px;
+      height: 108px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      background: #000;
+    }
+    .thumbs img.active {
+      border-color: var(--accent);
+    }
+    .card-wrap {
+      position: relative;
+      width: min(88vw, 420px);
+      aspect-ratio: 2 / 3;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 16px 36px rgba(48, 36, 22, 0.14);
+      background: #000;
+      user-select: none;
+      touch-action: none;
+    }
+    .under, .outline, canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .under { background-size: cover; background-position: center; }
+    .outline {
+      pointer-events: none;
+      background-size: cover;
+      background-position: center;
+      mix-blend-mode: lighten;
+    }
+    canvas { cursor: crosshair; }
+    .controls {
+      margin-top: 1.25rem;
+      display: flex;
       gap: 0.6rem;
       flex-wrap: wrap;
       justify-content: center;
     }
-    select {
-      min-height: 44px;
-      padding: 0.4rem 0.8rem;
-      border-radius: 999px;
-      border: 1px solid var(--muted);
-      background: var(--surface);
-      color: var(--ink);
-      font: 500 0.95rem/1 var(--sans);
-    }
-    .card-wrap {
-      position: relative;
-      width: min(90vw, 480px);
-      aspect-ratio: 3 / 2;
-      border-radius: 18px;
-      overflow: hidden;
-      box-shadow: 0 18px 40px rgba(48, 36, 22, 0.12);
-      background: var(--surface);
-      border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
-      user-select: none;
-      touch-action: none;
-    }
-    canvas#scratch {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      cursor: crosshair;
-    }
-    canvas#confetti {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 10;
-    }
-    .under {
-      position: absolute;
-      inset: 0;
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-    }
-    .controls {
-      margin-top: 1.5rem;
-      display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
     button {
-      min-height: 44px;
-      padding: 0.55rem 1.15rem;
+      min-height: 40px;
+      padding: 0.45rem 1rem;
       border-radius: 999px;
       border: 1px solid var(--enamel);
       background: var(--enamel);
       color: #f6f3ec;
-      font: 500 0.98rem/1 var(--sans);
+      font: 500 0.92rem/1 var(--sans);
       cursor: pointer;
     }
     button.ghost {
@@ -125,10 +140,9 @@
       color: var(--ink);
       border-color: var(--muted);
     }
-    button:hover { filter: brightness(0.95); }
     .hint {
-      margin-top: 1rem;
-      font-size: 0.9rem;
+      margin-top: 0.8rem;
+      font-size: 0.85rem;
       color: var(--muted);
       text-align: center;
     }
@@ -139,46 +153,44 @@
     }
     .celebrate {
       position: fixed;
-      top: 18%;
+      top: 16%;
       left: 50%;
       transform: translateX(-50%);
       font-family: var(--serif);
-      font-size: clamp(1.8rem, 5vw, 2.6rem);
+      font-size: clamp(1.6rem, 5vw, 2.4rem);
       font-weight: 600;
       color: var(--accent);
       pointer-events: none;
       z-index: 11;
       opacity: 0;
       transition: opacity 0.3s ease;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
     .celebrate.show { opacity: 1; }
+    canvas#confetti {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
   </style>
 </head>
 <body>
   <h1>Scratch-Off</h1>
-  <p class="lede">Pick a holiday, then scratch. Fully clear the coating to reveal the image — hit 100% for a celebration.</p>
+  <p class="lede">White outlines stay visible. Scratch the black to reveal the colors.</p>
 
-  <div class="picker">
-    <label for="theme">Reveal:</label>
-    <select id="theme">
-      <option value="christmas">Christmas</option>
-      <option value="halloween">Halloween</option>
-      <option value="thanksgiving">Thanksgiving</option>
-      <option value="easter">Easter</option>
-      <option value="valentines">Valentine’s</option>
-      <option value="july4">July 4th</option>
-      <option value="newyear">New Year</option>
-    </select>
-  </div>
+  <div class="tabs" id="tabs"></div>
+  <div class="thumbs" id="thumbs"></div>
 
   <div class="card-wrap" id="card">
     <div class="under" id="under"></div>
     <canvas id="scratch"></canvas>
+    <div class="outline" id="outline"></div>
   </div>
 
   <div class="controls">
-    <button id="reset" type="button">Reset card</button>
+    <button id="reset" type="button">Reset</button>
     <button id="clear" type="button" class="ghost">Reveal all</button>
   </div>
   <p class="hint">Scratched: <span class="percent" id="pct">0</span>%</p>
@@ -186,30 +198,88 @@
   <canvas id="confetti"></canvas>
 
   <script>
+    const art = {
+      christmas: [
+        { name: 'Snowman', outline: '/scratch-off/art/christmas/snowman-outline.jpg', color: '/scratch-off/art/christmas/snowman-color.jpg' },
+        { name: 'Penguins', outline: '/scratch-off/art/christmas/penguins-outline.jpg', color: '/scratch-off/art/christmas/penguins-color.jpg' },
+        { name: 'Tree', outline: '/scratch-off/art/christmas/tree-outline.jpg', color: '/scratch-off/art/christmas/tree-color.jpg' }
+      ],
+      halloween: [
+        { name: 'Pumpkin', outline: '/scratch-off/art/halloween/pumpkin-outline.jpg', color: '/scratch-off/art/halloween/pumpkin-color.jpg' },
+        { name: 'Witch', outline: '/scratch-off/art/halloween/witch-outline.jpg', color: '/scratch-off/art/halloween/witch-color.jpg' },
+        { name: 'Cat', outline: '/scratch-off/art/halloween/cat-outline.jpg', color: '/scratch-off/art/halloween/cat-color.jpg' }
+      ],
+      thanksgiving: [
+        { name: 'Turkey', outline: '/scratch-off/art/thanksgiving/turkey-outline.jpg', color: '/scratch-off/art/thanksgiving/turkey-color.jpg' }
+      ],
+      easter: [
+        { name: 'Bunny', outline: '/scratch-off/art/easter/bunny-outline.jpg', color: '/scratch-off/art/easter/bunny-color.jpg' }
+      ],
+      valentines: [
+        { name: 'Heart', outline: '/scratch-off/art/valentines/heart-outline.jpg', color: '/scratch-off/art/valentines/heart-color.jpg' }
+      ]
+    };
+
     const canvas = document.getElementById('scratch');
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     const confettiCanvas = document.getElementById('confetti');
     const confettiCtx = confettiCanvas.getContext('2d');
     const card = document.getElementById('card');
     const under = document.getElementById('under');
+    const outlineEl = document.getElementById('outline');
     const pctEl = document.getElementById('pct');
     const celebrateEl = document.getElementById('celebrate');
-    const themeSelect = document.getElementById('theme');
-    const BRUSH = 28;
+    const tabsEl = document.getElementById('tabs');
+    const thumbsEl = document.getElementById('thumbs');
+    const BRUSH = 32;
+    let currentHoliday = 'christmas';
+    let currentIndex = 0;
     let celebrated = false;
 
-    const themes = {
-      christmas: '/scratch-off/images/christmas.jpg',
-      halloween: '/scratch-off/images/halloween.jpg',
-      thanksgiving: '/scratch-off/images/thanksgiving.jpg',
-      easter: '/scratch-off/images/easter.jpg',
-      valentines: '/scratch-off/images/valentines.jpg',
-      july4: '/scratch-off/images/july4.jpg',
-      newyear: '/scratch-off/images/newyear.jpg'
-    };
+    function buildTabs() {
+      tabsEl.innerHTML = '';
+      Object.keys(art).forEach(key => {
+        const btn = document.createElement('button');
+        btn.textContent = key.charAt(0).toUpperCase() + key.slice(1);
+        btn.dataset.holiday = key;
+        if (key === currentHoliday) btn.classList.add('active');
+        btn.addEventListener('click', () => {
+          currentHoliday = key;
+          currentIndex = 0;
+          celebrated = false;
+          celebrateEl.classList.remove('show');
+          buildTabs();
+          buildThumbs();
+          loadArt();
+        });
+        tabsEl.appendChild(btn);
+      });
+    }
 
-    function setTheme(key) {
-      under.style.backgroundImage = `url(${themes[key] || themes.christmas})`;
+    function buildThumbs() {
+      thumbsEl.innerHTML = '';
+      art[currentHoliday].forEach((item, i) => {
+        const img = document.createElement('img');
+        img.src = item.outline;
+        img.alt = item.name;
+        if (i === currentIndex) img.classList.add('active');
+        img.addEventListener('click', () => {
+          currentIndex = i;
+          celebrated = false;
+          celebrateEl.classList.remove('show');
+          buildThumbs();
+          loadArt();
+        });
+        thumbsEl.appendChild(img);
+      });
+    }
+
+    function loadArt() {
+      const item = art[currentHoliday][currentIndex];
+      under.style.backgroundImage = `url(${item.color})`;
+      outlineEl.style.backgroundImage = `url(${item.outline})`;
+      paintCover();
+      pctEl.textContent = '0';
     }
 
     function sizeCanvas() {
@@ -278,7 +348,7 @@
       if (!drawing) return;
       e.preventDefault();
       scratchTo(pos(e));
-      if (Math.random() < 0.12) updatePercent();
+      if (Math.random() < 0.1) updatePercent();
     }
     function end() {
       if (!drawing) return;
@@ -305,18 +375,16 @@
       } catch (err) {}
     }
 
-    // Confetti
     const colors = ['#e74c3c', '#f39c12', '#f1c40f', '#2ecc71', '#3498db', '#9b59b6', '#e91e63', '#fff'];
     let particles = [];
     let animating = false;
 
     function spawnConfetti() {
       const w = window.innerWidth;
-      const h = window.innerHeight;
-      for (let i = 0; i < 140; i++) {
+      for (let i = 0; i < 120; i++) {
         particles.push({
           x: Math.random() * w,
-          y: -20 - Math.random() * 100,
+          y: -20 - Math.random() * 80,
           w: 6 + Math.random() * 8,
           h: 10 + Math.random() * 12,
           color: colors[Math.floor(Math.random() * colors.length)],
@@ -336,7 +404,7 @@
         p.y += p.vy;
         p.vy += 0.08;
         p.rot += p.vr;
-        p.alpha -= 0.006;
+        p.alpha -= 0.007;
         if (p.alpha <= 0) return;
         confettiCtx.save();
         confettiCtx.translate(p.x, p.y);
@@ -347,17 +415,13 @@
         confettiCtx.restore();
       });
       particles = particles.filter(p => p.alpha > 0 && p.y < window.innerHeight + 40);
-      if (particles.length) {
-        requestAnimationFrame(drawConfetti);
-      } else {
-        animating = false;
-        confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-      }
+      if (particles.length) requestAnimationFrame(drawConfetti);
+      else animating = false;
     }
 
     function celebrate() {
       celebrateEl.classList.add('show');
-      setTimeout(() => celebrateEl.classList.remove('show'), 2200);
+      setTimeout(() => celebrateEl.classList.remove('show'), 2000);
       if (!animating) {
         animating = true;
         spawnConfetti();
@@ -388,16 +452,10 @@
       }
     });
 
-    themeSelect.addEventListener('change', () => {
-      setTheme(themeSelect.value);
-      paintCover();
-      pctEl.textContent = '0';
-      celebrated = false;
-      celebrateEl.classList.remove('show');
-    });
-
     window.addEventListener('resize', sizeCanvas);
-    setTheme(themeSelect.value);
+    buildTabs();
+    buildThumbs();
+    loadArt();
     sizeCanvas();
   </script>
 </body>
