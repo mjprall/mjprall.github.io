@@ -48,13 +48,30 @@
     }
     .lede {
       color: var(--muted);
-      margin: 0 0 2rem;
+      margin: 0 0 1.5rem;
       text-align: center;
       max-width: 36rem;
     }
+    .picker {
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    select {
+      min-height: 44px;
+      padding: 0.4rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid var(--muted);
+      background: var(--surface);
+      color: var(--ink);
+      font: 500 0.95rem/1 var(--sans);
+    }
     .card-wrap {
       position: relative;
-      width: min(90vw, 420px);
+      width: min(90vw, 480px);
       aspect-ratio: 3 / 2;
       border-radius: 18px;
       overflow: hidden;
@@ -74,23 +91,9 @@
     .under {
       position: absolute;
       inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 1.5rem;
-      background:
-        radial-gradient(circle at 30% 30%, #ff6b6b, transparent 50%),
-        radial-gradient(circle at 70% 60%, #4ecdc4, transparent 50%),
-        radial-gradient(circle at 50% 80%, #ffe66d, transparent 40%),
-        linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      font-family: var(--serif);
-      font-size: clamp(1.6rem, 5vw, 2.4rem);
-      font-weight: 560;
-      letter-spacing: -0.02em;
-      line-height: 1.15;
-      text-shadow: 0 2px 12px rgba(0,0,0,0.35);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
     }
     .controls {
       margin-top: 1.5rem;
@@ -130,12 +133,23 @@
 </head>
 <body>
   <h1>Scratch-Off</h1>
-  <p class="lede">Drag or rub to scratch away the black coating and reveal what’s underneath. Works with mouse or finger.</p>
+  <p class="lede">Pick a holiday theme, then drag or rub to scratch away the black coating. Bigger brush, smoother reveal.</p>
+
+  <div class="picker">
+    <label for="theme">Reveal:</label>
+    <select id="theme">
+      <option value="christmas">Christmas</option>
+      <option value="halloween">Halloween</option>
+      <option value="thanksgiving">Thanksgiving</option>
+      <option value="easter">Easter</option>
+      <option value="valentines">Valentine’s</option>
+      <option value="july4">July 4th</option>
+      <option value="newyear">New Year</option>
+    </select>
+  </div>
 
   <div class="card-wrap" id="card">
-    <div class="under" id="under">
-      You found it.<br>Nice scratch.
-    </div>
+    <div class="under" id="under"></div>
     <canvas id="scratch"></canvas>
   </div>
 
@@ -149,8 +163,24 @@
     const canvas = document.getElementById('scratch');
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     const card = document.getElementById('card');
+    const under = document.getElementById('under');
     const pctEl = document.getElementById('pct');
-    const BRUSH = 28;
+    const themeSelect = document.getElementById('theme');
+    const BRUSH = 52; // larger, more sensitive
+
+    const themes = {
+      christmas: 'linear-gradient(135deg, #c41e3a, #165b33), radial-gradient(circle at 30% 20%, #fff 0 8%, transparent 9%)',
+      halloween: 'linear-gradient(135deg, #1a1a2e, #e94560), radial-gradient(circle at 70% 30%, #f9a825 0 12%, transparent 13%)',
+      thanksgiving: 'linear-gradient(135deg, #d35400, #8b4513), radial-gradient(circle at 50% 40%, #f39c12 0 10%, transparent 11%)',
+      easter: 'linear-gradient(135deg, #f8bbd0, #c8e6c9), radial-gradient(circle at 40% 60%, #fff9c4 0 8%, transparent 9%)',
+      valentines: 'linear-gradient(135deg, #e91e63, #f48fb1)',
+      july4: 'linear-gradient(135deg, #0d47a1, #b71c1c), radial-gradient(circle at 50% 20%, #fff 0 6%, transparent 7%)',
+      newyear: 'linear-gradient(135deg, #0d1b2a, #1b263b), radial-gradient(circle at 60% 30%, #ffd700 0 10%, transparent 11%)'
+    };
+
+    function setTheme(key) {
+      under.style.background = themes[key] || themes.christmas;
+    }
 
     function sizeCanvas() {
       const rect = card.getBoundingClientRect();
@@ -167,11 +197,9 @@
       ctx.globalCompositeOperation = 'source-over';
       ctx.fillStyle = '#111';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // subtle metallic sheen lines so it feels like foil
-      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+      ctx.strokeStyle = 'rgba(255,255,255,0.07)';
       ctx.lineWidth = 1;
-      for (let y = 0; y < canvas.height; y += 6) {
+      for (let y = 0; y < canvas.height; y += 5) {
         ctx.beginPath();
         ctx.moveTo(0, y);
         ctx.lineTo(canvas.width, y);
@@ -185,10 +213,7 @@
     function pos(e) {
       const rect = canvas.getBoundingClientRect();
       const t = e.touches ? e.touches[0] : e;
-      return {
-        x: t.clientX - rect.left,
-        y: t.clientY - rect.top
-      };
+      return { x: t.clientX - rect.left, y: t.clientY - rect.top };
     }
 
     function scratchTo(p) {
@@ -219,7 +244,7 @@
       if (!drawing) return;
       e.preventDefault();
       scratchTo(pos(e));
-      if (Math.random() < 0.15) updatePercent();
+      if (Math.random() < 0.2) updatePercent();
     }
     function end() {
       if (!drawing) return;
@@ -232,18 +257,18 @@
       try {
         const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
         let transparent = 0;
-        const step = 16;
+        const step = 12;
         for (let i = 3; i < data.length; i += step) {
-          if (data[i] < 32) transparent++;
+          if (data[i] < 40) transparent++;
         }
         const sampled = Math.ceil(data.length / 4 / (step / 4));
         const pct = Math.min(100, Math.round((transparent / sampled) * 100));
         pctEl.textContent = pct;
-        if (pct > 62) {
+        if (pct > 38) {
           setTimeout(() => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             pctEl.textContent = 100;
-          }, 200);
+          }, 120);
         }
       } catch (err) {}
     }
@@ -252,7 +277,6 @@
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', end);
     window.addEventListener('pointercancel', end);
-
     canvas.addEventListener('touchstart', start, { passive: false });
     window.addEventListener('touchmove', move, { passive: false });
     window.addEventListener('touchend', end);
@@ -266,7 +290,14 @@
       pctEl.textContent = '100';
     });
 
+    themeSelect.addEventListener('change', () => {
+      setTheme(themeSelect.value);
+      paintCover();
+      pctEl.textContent = '0';
+    });
+
     window.addEventListener('resize', sizeCanvas);
+    setTheme(themeSelect.value);
     sizeCanvas();
   </script>
 </body>
