@@ -133,7 +133,7 @@
 </head>
 <body>
   <h1>Scratch-Off</h1>
-  <p class="lede">Pick a holiday, then scratch away the black coating to reveal the full image.</p>
+  <p class="lede">Pick a holiday, then scratch. The area you touch clears fully and shows the image at full brightness.</p>
 
   <div class="picker">
     <label for="theme">Reveal:</label>
@@ -166,7 +166,7 @@
     const under = document.getElementById('under');
     const pctEl = document.getElementById('pct');
     const themeSelect = document.getElementById('theme');
-    const BRUSH = 28; // original smaller size
+    const BRUSH = 28;
 
     const themes = {
       christmas: '/scratch-off/images/christmas.jpg',
@@ -195,16 +195,8 @@
 
     function paintCover() {
       ctx.globalCompositeOperation = 'source-over';
-      ctx.fillStyle = '#111';
+      ctx.fillStyle = '#000';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-      ctx.lineWidth = 1;
-      for (let y = 0; y < canvas.height; y += 6) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-      }
     }
 
     let drawing = false;
@@ -216,20 +208,26 @@
       return { x: t.clientX - rect.left, y: t.clientY - rect.top };
     }
 
-    function scratchTo(p) {
+    function clearCircle(x, y, r) {
       ctx.globalCompositeOperation = 'destination-out';
-      ctx.lineJoin = 'round';
-      ctx.lineCap = 'round';
-      ctx.lineWidth = BRUSH;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function scratchTo(p) {
+      const r = BRUSH / 2;
       if (last) {
-        ctx.beginPath();
-        ctx.moveTo(last.x, last.y);
-        ctx.lineTo(p.x, p.y);
-        ctx.stroke();
+        const dx = p.x - last.x;
+        const dy = p.y - last.y;
+        const dist = Math.hypot(dx, dy);
+        const steps = Math.max(1, Math.ceil(dist / 2));
+        for (let i = 0; i <= steps; i++) {
+          const t = i / steps;
+          clearCircle(last.x + dx * t, last.y + dy * t, r);
+        }
       } else {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, BRUSH / 2, 0, Math.PI * 2);
-        ctx.fill();
+        clearCircle(p.x, p.y, r);
       }
       last = p;
     }
@@ -244,7 +242,7 @@
       if (!drawing) return;
       e.preventDefault();
       scratchTo(pos(e));
-      if (Math.random() < 0.15) updatePercent();
+      if (Math.random() < 0.12) updatePercent();
     }
     function end() {
       if (!drawing) return;
@@ -259,17 +257,11 @@
         let transparent = 0;
         const step = 16;
         for (let i = 3; i < data.length; i += step) {
-          if (data[i] < 32) transparent++;
+          if (data[i] < 10) transparent++;
         }
         const sampled = Math.ceil(data.length / 4 / (step / 4));
         const pct = Math.min(100, Math.round((transparent / sampled) * 100));
         pctEl.textContent = pct;
-        if (pct > 70) { // higher threshold so it reveals more fully before auto-clear
-          setTimeout(() => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            pctEl.textContent = 100;
-          }, 150);
-        }
       } catch (err) {}
     }
 
