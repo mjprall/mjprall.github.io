@@ -81,12 +81,20 @@
       user-select: none;
       touch-action: none;
     }
-    canvas {
+    canvas#scratch {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
       cursor: crosshair;
+    }
+    canvas#confetti {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
     }
     .under {
       position: absolute;
@@ -129,11 +137,27 @@
       font-weight: 600;
       color: var(--accent);
     }
+    .celebrate {
+      position: fixed;
+      top: 18%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--serif);
+      font-size: clamp(1.8rem, 5vw, 2.6rem);
+      font-weight: 600;
+      color: var(--accent);
+      pointer-events: none;
+      z-index: 11;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .celebrate.show { opacity: 1; }
   </style>
 </head>
 <body>
   <h1>Scratch-Off</h1>
-  <p class="lede">Pick a holiday, then scratch. The area you touch clears fully and shows the image at full brightness.</p>
+  <p class="lede">Pick a holiday, then scratch. Fully clear the coating to reveal the image — hit 100% for a celebration.</p>
 
   <div class="picker">
     <label for="theme">Reveal:</label>
@@ -158,15 +182,21 @@
     <button id="clear" type="button" class="ghost">Reveal all</button>
   </div>
   <p class="hint">Scratched: <span class="percent" id="pct">0</span>%</p>
+  <div class="celebrate" id="celebrate">You did it!</div>
+  <canvas id="confetti"></canvas>
 
   <script>
     const canvas = document.getElementById('scratch');
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const confettiCanvas = document.getElementById('confetti');
+    const confettiCtx = confettiCanvas.getContext('2d');
     const card = document.getElementById('card');
     const under = document.getElementById('under');
     const pctEl = document.getElementById('pct');
+    const celebrateEl = document.getElementById('celebrate');
     const themeSelect = document.getElementById('theme');
     const BRUSH = 28;
+    let celebrated = false;
 
     const themes = {
       christmas: '/scratch-off/images/christmas.jpg',
@@ -191,6 +221,12 @@
       canvas.style.height = rect.height + 'px';
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       paintCover();
+
+      confettiCanvas.width = window.innerWidth * dpr;
+      confettiCanvas.height = window.innerHeight * dpr;
+      confettiCanvas.style.width = window.innerWidth + 'px';
+      confettiCanvas.style.height = window.innerHeight + 'px';
+      confettiCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
 
     function paintCover() {
@@ -262,7 +298,71 @@
         const sampled = Math.ceil(data.length / 4 / (step / 4));
         const pct = Math.min(100, Math.round((transparent / sampled) * 100));
         pctEl.textContent = pct;
+        if (pct >= 100 && !celebrated) {
+          celebrated = true;
+          celebrate();
+        }
       } catch (err) {}
+    }
+
+    // Confetti
+    const colors = ['#e74c3c', '#f39c12', '#f1c40f', '#2ecc71', '#3498db', '#9b59b6', '#e91e63', '#fff'];
+    let particles = [];
+    let animating = false;
+
+    function spawnConfetti() {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      for (let i = 0; i < 140; i++) {
+        particles.push({
+          x: Math.random() * w,
+          y: -20 - Math.random() * 100,
+          w: 6 + Math.random() * 8,
+          h: 10 + Math.random() * 12,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vy: 2 + Math.random() * 4,
+          vx: (Math.random() - 0.5) * 3,
+          rot: Math.random() * Math.PI * 2,
+          vr: (Math.random() - 0.5) * 0.2,
+          alpha: 1
+        });
+      }
+    }
+
+    function drawConfetti() {
+      confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.08;
+        p.rot += p.vr;
+        p.alpha -= 0.006;
+        if (p.alpha <= 0) return;
+        confettiCtx.save();
+        confettiCtx.translate(p.x, p.y);
+        confettiCtx.rotate(p.rot);
+        confettiCtx.globalAlpha = Math.max(0, p.alpha);
+        confettiCtx.fillStyle = p.color;
+        confettiCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        confettiCtx.restore();
+      });
+      particles = particles.filter(p => p.alpha > 0 && p.y < window.innerHeight + 40);
+      if (particles.length) {
+        requestAnimationFrame(drawConfetti);
+      } else {
+        animating = false;
+        confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      }
+    }
+
+    function celebrate() {
+      celebrateEl.classList.add('show');
+      setTimeout(() => celebrateEl.classList.remove('show'), 2200);
+      if (!animating) {
+        animating = true;
+        spawnConfetti();
+        requestAnimationFrame(drawConfetti);
+      }
     }
 
     canvas.addEventListener('pointerdown', start);
@@ -276,16 +376,24 @@
     document.getElementById('reset').addEventListener('click', () => {
       paintCover();
       pctEl.textContent = '0';
+      celebrated = false;
+      celebrateEl.classList.remove('show');
     });
     document.getElementById('clear').addEventListener('click', () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       pctEl.textContent = '100';
+      if (!celebrated) {
+        celebrated = true;
+        celebrate();
+      }
     });
 
     themeSelect.addEventListener('change', () => {
       setTheme(themeSelect.value);
       paintCover();
       pctEl.textContent = '0';
+      celebrated = false;
+      celebrateEl.classList.remove('show');
     });
 
     window.addEventListener('resize', sizeCanvas);
