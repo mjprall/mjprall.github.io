@@ -210,7 +210,9 @@
         { name: 'Cat', outline: '/scratch-off/art/halloween/cat-outline.jpg', color: '/scratch-off/art/halloween/cat-color.jpg' }
       ],
       thanksgiving: [
-        { name: 'Turkey', outline: '/scratch-off/art/thanksgiving/turkey-outline.jpg', color: '/scratch-off/art/thanksgiving/turkey-color.jpg' }
+        { name: 'Turkey', outline: '/scratch-off/art/thanksgiving/turkey-outline.jpg', color: '/scratch-off/art/thanksgiving/turkey-color.jpg' },
+        { name: 'Cornucopia', outline: '/scratch-off/art/thanksgiving/cornucopia-outline.jpg', color: '/scratch-off/art/thanksgiving/cornucopia-color.jpg' },
+        { name: 'Pilgrims', outline: '/scratch-off/art/thanksgiving/pilgrims-outline.jpg', color: '/scratch-off/art/thanksgiving/pilgrims-color.jpg' }
       ],
       easter: [
         { name: 'Bunny', outline: '/scratch-off/art/easter/bunny-outline.jpg', color: '/scratch-off/art/easter/bunny-color.jpg' }
@@ -236,6 +238,22 @@
     let currentIndex = 0;
     let celebrated = false;
 
+    function getHolidayFromURL() {
+      const params = new URLSearchParams(location.search);
+      const q = params.get('holiday') || params.get('h');
+      if (q && art[q]) return q;
+      const hash = location.hash.slice(1);
+      if (hash && art[hash]) return hash;
+      return 'christmas';
+    }
+
+    function setHolidayInURL(holiday) {
+      const url = new URL(location);
+      url.searchParams.set('holiday', holiday);
+      url.hash = '';
+      history.replaceState(null, '', url);
+    }
+
     function buildTabs() {
       tabsEl.innerHTML = '';
       Object.keys(art).forEach(key => {
@@ -248,6 +266,7 @@
           currentIndex = 0;
           celebrated = false;
           celebrateEl.classList.remove('show');
+          setHolidayInURL(key);
           buildTabs();
           buildThumbs();
           loadArt();
@@ -453,6 +472,8 @@
     });
 
     window.addEventListener('resize', sizeCanvas);
+    currentHoliday = getHolidayFromURL();
+    setHolidayInURL(currentHoliday);
     buildTabs();
     buildThumbs();
     loadArt();
