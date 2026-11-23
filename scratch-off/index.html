@@ -133,7 +133,7 @@
 </head>
 <body>
   <h1>Scratch-Off</h1>
-  <p class="lede">Pick a holiday theme, then drag or rub to scratch away the black coating. Bigger brush, smoother reveal.</p>
+  <p class="lede">Pick a holiday, then scratch away the black coating to reveal the full image.</p>
 
   <div class="picker">
     <label for="theme">Reveal:</label>
@@ -166,20 +166,20 @@
     const under = document.getElementById('under');
     const pctEl = document.getElementById('pct');
     const themeSelect = document.getElementById('theme');
-    const BRUSH = 52; // larger, more sensitive
+    const BRUSH = 28; // original smaller size
 
     const themes = {
-      christmas: 'linear-gradient(135deg, #c41e3a, #165b33), radial-gradient(circle at 30% 20%, #fff 0 8%, transparent 9%)',
-      halloween: 'linear-gradient(135deg, #1a1a2e, #e94560), radial-gradient(circle at 70% 30%, #f9a825 0 12%, transparent 13%)',
-      thanksgiving: 'linear-gradient(135deg, #d35400, #8b4513), radial-gradient(circle at 50% 40%, #f39c12 0 10%, transparent 11%)',
-      easter: 'linear-gradient(135deg, #f8bbd0, #c8e6c9), radial-gradient(circle at 40% 60%, #fff9c4 0 8%, transparent 9%)',
-      valentines: 'linear-gradient(135deg, #e91e63, #f48fb1)',
-      july4: 'linear-gradient(135deg, #0d47a1, #b71c1c), radial-gradient(circle at 50% 20%, #fff 0 6%, transparent 7%)',
-      newyear: 'linear-gradient(135deg, #0d1b2a, #1b263b), radial-gradient(circle at 60% 30%, #ffd700 0 10%, transparent 11%)'
+      christmas: '/scratch-off/images/christmas.jpg',
+      halloween: '/scratch-off/images/halloween.jpg',
+      thanksgiving: '/scratch-off/images/thanksgiving.jpg',
+      easter: '/scratch-off/images/easter.jpg',
+      valentines: '/scratch-off/images/valentines.jpg',
+      july4: '/scratch-off/images/july4.jpg',
+      newyear: '/scratch-off/images/newyear.jpg'
     };
 
     function setTheme(key) {
-      under.style.background = themes[key] || themes.christmas;
+      under.style.backgroundImage = `url(${themes[key] || themes.christmas})`;
     }
 
     function sizeCanvas() {
@@ -197,9 +197,9 @@
       ctx.globalCompositeOperation = 'source-over';
       ctx.fillStyle = '#111';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
       ctx.lineWidth = 1;
-      for (let y = 0; y < canvas.height; y += 5) {
+      for (let y = 0; y < canvas.height; y += 6) {
         ctx.beginPath();
         ctx.moveTo(0, y);
         ctx.lineTo(canvas.width, y);
@@ -244,7 +244,7 @@
       if (!drawing) return;
       e.preventDefault();
       scratchTo(pos(e));
-      if (Math.random() < 0.2) updatePercent();
+      if (Math.random() < 0.15) updatePercent();
     }
     function end() {
       if (!drawing) return;
@@ -257,18 +257,18 @@
       try {
         const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
         let transparent = 0;
-        const step = 12;
+        const step = 16;
         for (let i = 3; i < data.length; i += step) {
-          if (data[i] < 40) transparent++;
+          if (data[i] < 32) transparent++;
         }
         const sampled = Math.ceil(data.length / 4 / (step / 4));
         const pct = Math.min(100, Math.round((transparent / sampled) * 100));
         pctEl.textContent = pct;
-        if (pct > 38) {
+        if (pct > 70) { // higher threshold so it reveals more fully before auto-clear
           setTimeout(() => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             pctEl.textContent = 100;
-          }, 120);
+          }, 150);
         }
       } catch (err) {}
     }
